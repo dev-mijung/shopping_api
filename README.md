@@ -1,2 +1,2 @@
 # shopping_api
-쇼핑몰API 
+DATA 전송을 위한 쇼핑몰API 
