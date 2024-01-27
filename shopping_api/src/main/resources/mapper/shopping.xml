@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.nuri.api.mapper.ShoppingMapper">
+    <insert id="userInsert" parameterType="com.nuri.api.model.UserVO">
+        insert into shopping.user(user_id, user_name, user_passwd, user_tel, user_zip, user_address)
+        values(#{user_id}, #{user_name}, #{user_passwd}, #{user_tel}, #{user_zip}, #{user_address})
+    </insert>
+    
+    <!-- 아이디 중복확인-->
+    <select id="checkID" resultType="int" parameterType="String">
+        select count(user_id) as cnt
+        from shopping.user
+        where user_id=#{user_id}
+    </select>
+    
+    
+    <!-- 로그인처리-->
+    <select id="login" resultType="int" parameterType="map">
+        select count(*) as cnt
+        from shopping.user
+        where user_id=#{user_id} and user_passwd=#{user_passwd}
+    </select>
+    
+    <!-- id에 해당하는 회원정보 불러오기-->
+    <select id="readById" resultType="com.nuri.api.model.UserVO" parameterType="String">
+        select user_id, user_name, user_passwd, user_tel, user_zip, user_address
+        from shopping.user
+        where user_id = #{user_id}
+    </select>
+    
+    <!-- 카테고리별 상품 가져오기-->
+    <select id="getProducts" resultType="com.nuri.api.model.CateVO" parameterType="int">
+        select t.cate_idx, t.category_idx, t.cate_name, t.cate_img, t.cate_price, t.cate_content
+        from shopping.category c, shopping.cate t
+        where (c.category_idx = t.category_idx) and t.category_idx = #{category_idx}
+    </select>
+    
+    <!-- 상품명 검색-->
+    <select id="getSearch" resultType="com.nuri.api.model.CateVO" parameterType="String">
+        select *
+        from shopping.cate
+        where cate_name like CONCAT('%',#{cate_name},'%')
+    </select>
+    
+    <!-- 상품 상세페이지-->
+    <select id="getDetail" resultType="com.nuri.api.model.CateVO" parameterType="int">
+        select *
+        from shopping.cate
+        where cate_idx=#{cate_idx}
+    </select>
+    
+    <!-- 장바구니에 추가-->
+    <insert id="addCart" parameterType="com.nuri.api.model.CartVO">
+        insert into shopping.cart(user_id, cate_idx, cart_name, cart_img, cart_price)
+        values(#{user_id}, #{cate_idx}, #{cart_name}, #{cart_img}, #{cart_price})
+    </insert>
+    
+    <!-- 장바구니리스트-->
+    <select id="getCartList" resultType="com.nuri.api.model.CartVO" parameterType="String">
+        select a.cart_idx, a.cate_idx, a.user_id, a.cart_name, a.cart_img, a.cart_price
+        from shopping.cart a
+        where a.user_id=#{user_id}
+    </select>
+    
+    <!-- 낮은가격순 으로 정렬 -->
+    <select id="orderByCatePriceAsc" resultType="com.nuri.api.model.CateVO" parameterType="int">
+        select * from shopping.cate
+        where category_idx=#{category_idx}
+        order by cate_price
+    </select>
+    
+    <!-- 높은가격순으로 정렬-->
+    <select id="orderByCatePriceDesc" resultType="com.nuri.api.model.CateVO" parameterType="int">
+        select * from shopping.cate
+        where category_idx=#{category_idx}
+        order by cate_price desc
+    </select>
+    
+    <!-- 최신날짜순으로 정렬-->
+    <select id="orderByDate" resultType="com.nuri.api.model.CateVO" parameterType="int">
+        select * from shopping.cate
+        where category_idx=#{category_idx}
+        order by cate_date desc
+    </select>
+    
+    <!--회원별 정보조회-->
+    <select id="getUserInfo" resultType="com.nuri.api.model.UserVO" parameterType="String">
+        select * from shopping.user
+        where user_id=#{user_id}
+    </select>
+    
+    <!-- 구매하기 클릭시 구매테이블에 저장-->
+    <insert id="addPay" parameterType="com.nuri.api.model.PayVO">
+        insert into shopping.pay(user_id, cate_name, cate_img, cate_price, pay_date)
+        values(#{user_id}, #{cate_name}, #{cate_img}, #{cate_price}, sysdate())
+    </insert>
+    
+    <!-- 마이페이지로이동-->
+    <select id="goMyPage" resultType="com.nuri.api.model.PayVO" parameterType="String">
+        select * from shopping.pay
+        where user_id=#{user_id}
+    </select>
+    
+    <!-- 이벤트페이지이동 --> 
+    <select id="goEvent" resultType="com.nuri.api.model.EventVO" parameterType="int">
+        select * from shopping.event
+        where event_idx=#{event_idx}    
+    </select>
+    
+    <!-- 구매한 내역 삭제-->
+    <delete id="deleteProduct" parameterType="String">
+        delete from shopping.cart
+        where user_id=#{user_id}
+    </delete>
+    
+    <!-- 구매테이블 조회-->
+    <select id="selectPay" resultType="com.nuri.api.model.CartVO" parameterType="String">
+        select * from cart
+        where user_id=#{user_id}
+    </select>
+  
+    <!-- cart_idx, user_idx에 해당하는 카트내역조회-->
+    <select id="selectCart" resultType="com.nuri.api.model.CartVO" parameterType="map">
+        select * from cart
+        where cart_idx=#{checkArr}
+    </select>
+</mapper>
